@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rose Petal Countdown to 2027</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      overflow: hidden;
+      background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #e8e8e8;
+      position: relative;
+    }
+
+    /* Universe stars */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle 4s infinite ease-in-out;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* Soft nebula glow */
+    .nebula {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(88, 28, 135, 0.15) 0%, transparent 70%);
+      top: 20%;
+      left: 10%;
+      filter: blur(40px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .nebula2 {
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(30, 58, 138, 0.12) 0%, transparent 70%);
+      bottom: 10%;
+      right: 15%;
+      filter: blur(50px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 300;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #f8d7da;
+      text-shadow: 0 0 20px rgba(248, 215, 218, 0.4);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      opacity: 0.7;
+      margin-bottom: 10px;
+    }
+
+    #rose-svg {
+      width: min(320px, 80vw);
+      height: auto;
+      filter: drop-shadow(0 0 25px rgba(220, 80, 100, 0.35));
+    }
+
+    .info {
+      margin-top: 8px;
+      font-size: 1.15rem;
+      color: #ffb3c1;
+    }
+
+    .countdown {
+      font-size: 1.8rem;
+      font-weight: 300;
+      letter-spacing: 1px;
+      margin-top: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px 28px;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+    }
+
+    .countdown span {
+      color: #ff8fa3;
+      font-weight: 500;
+    }
+
+    .message {
+      margin-top: 18px;
+      font-size: 1.1rem;
+      max-width: 340px;
+      line-height: 1.5;
+      opacity: 0.85;
+    }
+
+    .zero-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .zero-state h2 {
+      font-size: 2.2rem;
+      color: #ffd6e0;
+      text-shadow: 0 0 30px rgba(255, 214, 224, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="nebula"></div>
+  <div class="nebula2"></div>
+  <div class="stars" id="stars"></div>
+
+  <div class="content">
+    <h1>Petal by Petal</h1>
+    <p class="subtitle">A rose loses one petal every day until January 1, 2027</p>
+
+    <svg id="rose-svg" viewBox="0 0 300 420" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="stemGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#1e3a1e"/>
+          <stop offset="50%" stop-color="#2d5a27"/>
+          <stop offset="100%" stop-color="#1e3a1e"/>
+        </linearGradient>
+        <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffd700"/>
+          <stop offset="70%" stop-color="#ffaa00"/>
+          <stop offset="100%" stop-color="#cc8800"/>
+        </radialGradient>
+        <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#3a7a32"/>
+          <stop offset="100%" stop-color="#1e4a1a"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Stem -->
+      <path d="M150 210 Q142 280 150 390" stroke="url(#stemGrad)" stroke-width="10" fill="none" stroke-linecap="round"/>
+
+      <!-- Leaves -->
+      <path d="M150 300 Q110 270 85 295 Q115 320 150 300" fill="url(#leafGrad)" opacity="0.9"/>
+      <path d="M150 330 Q190 300 215 325 Q185 350 150 330" fill="url(#leafGrad)" opacity="0.9"/>
+
+      <!-- Petals will be injected here by JS -->
+      <g id="petals-group"></g>
+
+      <!-- Rose center (always visible) -->
+      <circle cx="150" cy="155" r="18" fill="url(#centerGrad)"/>
+      <circle cx="150" cy="155" r="8" fill="#fff3b0" opacity="0.6"/>
+    </svg>
+
+    <div class="info" id="petals-info">Petals remaining: —</div>
+    <div class="countdown" id="countdown">Calculating...</div>
+    <p class="message" id="message">
+      Each midnight a petal drifts away into the cosmos...<br>
+      Until only the new year remains.
+    </p>
+
+    <div class="zero-state" id="zero-state">
+      <h2>Happy 2027</h2>
+      <p>The last petal has fallen.<br>The rose returns to the stars.</p>
+    </div>
+  </div>
+
+  <script>
+    // ===== Stars =====
+    (function createStars() {
+      const container = document.getElementById('stars');
+      for (let i = 0; i < 180; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 2.2 + 0.6;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDuration = (Math.random() * 4 + 2) + 's';
+        star.style.animationDelay = Math.random() * 5 + 's';
+        container.appendChild(star);
+      }
+    })();
+
+    // ===== Target date =====
+    const TARGET = new Date('2027-01-01T00:00:00');
+
+    // ===== Rose petals =====
+    function drawRose(daysLeft) {
+      const group = document.getElementById('petals-group');
+      group.innerHTML = ''; // clear
+
+      if (daysLeft <= 0) return;
+
+      const cx = 150;
+      const cy = 155;
+      const goldenAngle = 137.508;
+
+      // Draw from outer → inner so outer petals are behind
+      for (let i = 0; i < daysLeft; i++) {
+        const progress = i / Math.max(daysLeft - 1, 1); // 0 = outer, 1 = inner
+        const size = 82 - progress * 52;                 // large → small
+        const angle = i * goldenAngle;
+        const offset = 4 + progress * 8;                 // slight radial push
+
+        const petal = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        // Classic rose petal shape (base at 0,0 → tip upward)
+        petal.setAttribute('d',
+          'M0,0 ' +
+          'C-22,-12 -32,-45 0,-78 ' +
+          'C32,-45 22,-12 0,0 Z'
+        );
+
+        // Color: deep rose → soft pink
+        const hue = 348 + progress * 12;
+        const light = 38 + progress * 22;
+        petal.setAttribute('fill', `hsl(${hue}, 72%, ${light}%)`);
+        petal.setAttribute('stroke', `hsl(${hue}, 60%, ${light - 12}%)`);
+        petal.setAttribute('stroke-width', '0.8');
+        petal.setAttribute('opacity', 0.92);
+
+        // Transform: move to center → rotate → push out a little → scale
+        petal.setAttribute('transform',
+          `translate(${cx},${cy}) rotate(${angle}) translate(0,${-offset}) scale(${size / 70})`
+        );
+
+        group.appendChild(petal);
+      }
+    }
+
+    // ===== Countdown + petals update =====
+    function update() {
+      const now = new Date();
+      const diff = TARGET - now;
+
+      const petalsInfo = document.getElementById('petals-info');
+      const countdownEl = document.getElementById('countdown');
+      const messageEl = document.getElementById('message');
+      const zeroState = document.getElementById('zero-state');
+      const roseSvg = document.getElementById('rose-svg');
+
+      if (diff <= 0) {
+        // All petals gone
+        drawRose(0);
+        petalsInfo.style.display = 'none';
+        countdownEl.style.display = 'none';
+        messageEl.style.display = 'none';
+        roseSvg.style.opacity = '0.4';
+        zeroState.style.display = 'flex';
+        return;
+      }
+
+      // Full days remaining (including the current partial day)
+      const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+      // Time components
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+      // Update UI
+      petalsInfo.textContent = `Petals remaining: ${daysLeft}`;
+      countdownEl.innerHTML =
+        `<span>${days}</span>d ` +
+        `<span>${String(hours).padStart(2, '0')}</span>:` +
+        `<span>${String(mins).padStart(2, '0')}</span>:` +
+        `<span>${String(secs).padStart(2, '0')}</span>`;
+
+      // Redraw rose only when the day count changes
+      if (window._lastDays !== daysLeft) {
+        window._lastDays = daysLeft;
+        drawRose(daysLeft);
+      }
+    }
+
+    // Initial draw + start ticking
+    update();
+    setInterval(update, 1000);
+  </script>
+</body>
+</html>

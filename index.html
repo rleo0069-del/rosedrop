@@ -7,19 +7,15 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      height: 100vh;
-      overflow: hidden;
-      background:
-        radial-gradient(ellipse at 70% 20%, rgba(120, 160, 190, 0.28), transparent 42%),
-        radial-gradient(ellipse at 20% 80%, rgba(20, 30, 40, 0.8), transparent 50%),
-        linear-gradient(180deg, #1a2836 0%, #0c1218 100%);
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0c1218;
+      font-family: "Segoe UI", system-ui, sans-serif;
       color: #e8eef2;
     }
-    .scene { position: relative; text-align: center; }
+    .scene { text-align: center; }
     h1 {
       font-weight: 300;
       letter-spacing: 4px;
@@ -28,45 +24,15 @@
       color: #f3d7dc;
       margin-bottom: 6px;
     }
-    .subtitle { opacity: 0.7; font-size: 0.92rem; margin-bottom: 8px; }
-    .dome-wrap { position: relative; width: min(420px, 92vw); height: 520px; margin: 0 auto; }
-    .glass {
-      position: absolute;
-      left: 50%;
-      bottom: 70px;
-      transform: translateX(-50%);
-      width: 280px;
-      height: 390px;
-      border: 3px solid rgba(220, 235, 245, 0.45);
-      border-bottom: none;
-      border-radius: 150px 150px 20px 20px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.08), transparent 30%, rgba(255,255,255,0.12) 70%, transparent);
-      box-shadow: inset 0 0 40px rgba(180, 210, 230, 0.15), 0 20px 40px rgba(0,0,0,0.35);
-      z-index: 3;
-      pointer-events: none;
+    .subtitle { opacity: 0.7; font-size: 0.92rem; margin-bottom: 12px; }
+    #rose-photo {
+      width: min(420px, 92vw);
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      object-fit: contain;
     }
-    .knob {
-      position: absolute;
-      left: 50%;
-      bottom: 448px;
-      transform: translateX(-50%);
-      width: 28px;
-      height: 46px;
-      border: 3px solid rgba(220, 235, 245, 0.5);
-      border-radius: 14px 14px 6px 6px;
-      z-index: 4;
-    }
-    #rose-svg { position: absolute; left: 50%; bottom: 78px; transform: translateX(-50%); width: 220px; z-index: 2; }
-    .table {
-      position: absolute;
-      left: 0; right: 0; bottom: 40px;
-      height: 36px;
-      background: linear-gradient(#1b242c, #10161c);
-      border-radius: 4px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-      z-index: 1;
-    }
-    .info { margin-top: 4px; color: #ffb3c1; }
+    .info { margin-top: 12px; color: #ffb3c1; }
     .countdown {
       display: inline-block;
       margin-top: 8px;
@@ -74,7 +40,6 @@
       border-radius: 40px;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.25);
-      letter-spacing: 1px;
     }
     .countdown span { color: #ff8fa3; }
     .message { margin-top: 10px; opacity: 0.8; font-size: 0.95rem; }
@@ -86,17 +51,7 @@
   <div class="scene">
     <h1>Petal by Petal</h1>
     <p class="subtitle">A rose loses one petal every day until January 1, 2027</p>
-    <div class="dome-wrap">
-      <div class="knob"></div>
-      <div class="glass"></div>
-      <svg id="rose-svg" viewBox="0 0 220 340" xmlns="http://www.w3.org/2000/svg">
-        <path d="M110 150 Q104 210 110 300" stroke="#2d5a27" stroke-width="7" fill="none" stroke-linecap="round"/>
-        <g id="petals-group"></g>
-        <g id="fallen"></g>
-        <circle cx="110" cy="118" r="10" fill="#c45a28"/>
-      </svg>
-      <div class="table"></div>
-    </div>
+    <img id="rose-photo" src="rose.jpg" alt="rose under glass">
     <div class="info" id="petals-info">Petals remaining: —</div>
     <div class="countdown" id="countdown">Calculating...</div>
     <p class="message" id="message">Each midnight a petal falls inside the glass.</p>
@@ -106,48 +61,18 @@
     </div>
   </div>
   <script>
-    const TARGET = new Date('2027-01-01T00:00:00');
-    function drawRose(daysLeft) {
-      const group = document.getElementById('petals-group');
-      const fallen = document.getElementById('fallen');
-      group.innerHTML = '';
-      fallen.innerHTML = '';
-      const cx = 110, cy = 118, golden = 137.508;
-      const shown = Math.min(daysLeft, 40);
-      for (let i = 0; i < shown; i++) {
-        const progress = i / Math.max(shown - 1, 1);
-        const size = 70 - progress * 40;
-        const petal = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        petal.setAttribute('d', 'M0,0 C-18,-10 -26,-36 0,-62 C26,-36 18,-10 0,0 Z');
-        const light = 32 + progress * 18;
-        petal.setAttribute('fill', `hsl(350, 70%, ${light}%)`);
-        petal.setAttribute('transform', `translate(${cx},${cy}) rotate(${i * golden}) translate(0,${-3 - progress * 6}) scale(${size / 62})`);
-        group.appendChild(petal);
-      }
-      const dropped = Math.max(0, 12 - Math.min(daysLeft, 12));
-      for (let i = 0; i < dropped + 4; i++) {
-        const p = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
-        p.setAttribute('cx', 40 + (i * 37) % 150);
-        p.setAttribute('cy', 312 + (i % 3) * 6);
-        p.setAttribute('rx', 10);
-        p.setAttribute('ry', 5);
-        p.setAttribute('fill', '#8e2438');
-        p.setAttribute('transform', `rotate(${i * 28} ${40 + (i * 37) % 150} ${312 + (i % 3) * 6})`);
-        fallen.appendChild(p);
-      }
-    }
+    const TARGET = new Date("2027-01-01T00:00:00");
     function update() {
       const diff = TARGET - new Date();
-      const petalsInfo = document.getElementById('petals-info');
-      const countdownEl = document.getElementById('countdown');
-      const messageEl = document.getElementById('message');
-      const zeroState = document.getElementById('zero-state');
+      const petalsInfo = document.getElementById("petals-info");
+      const countdownEl = document.getElementById("countdown");
+      const messageEl = document.getElementById("message");
+      const zeroState = document.getElementById("zero-state");
       if (diff <= 0) {
-        drawRose(0);
-        petalsInfo.style.display = 'none';
-        countdownEl.style.display = 'none';
-        messageEl.style.display = 'none';
-        zeroState.style.display = 'block';
+        petalsInfo.style.display = "none";
+        countdownEl.style.display = "none";
+        messageEl.style.display = "none";
+        zeroState.style.display = "block";
         return;
       }
       const daysLeft = Math.ceil(diff / 86400000);
@@ -155,12 +80,12 @@
       const hours = Math.floor((diff % 86400000) / 3600000);
       const mins = Math.floor((diff % 3600000) / 60000);
       const secs = Math.floor((diff % 60000) / 1000);
-      petalsInfo.textContent = `Petals remaining: ${daysLeft}`;
-      countdownEl.innerHTML = `<span>${days}</span>d <span>${String(hours).padStart(2,'0')}</span>:<span>${String(mins).padStart(2,'0')}</span>:<span>${String(secs).padStart(2,'0')}</span>`;
-      if (window._lastDays !== daysLeft) {
-        window._lastDays = daysLeft;
-        drawRose(daysLeft);
-      }
+      petalsInfo.textContent = "Petals remaining: " + daysLeft;
+      countdownEl.innerHTML =
+        "<span>" + days + "</span>d " +
+        "<span>" + String(hours).padStart(2, "0") + "</span>:" +
+        "<span>" + String(mins).padStart(2, "0") + "</span>:" +
+        "<span>" + String(secs).padStart(2, "0") + "</span>";
     }
     update();
     setInterval(update, 1000);
